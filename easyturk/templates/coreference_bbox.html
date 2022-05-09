@@ -145,7 +145,7 @@
 
         <div class='row' style="margin-top: 30px">
             <div class='col-12'>
-                <h2>Annotate the detected objects with parts of the chosen sentence:</h2>
+                <h2>Annotate all the detected objects that occur in the chosen sentence:</h2>
                 <div class='row' style='margin-top: 10px; padding-bottom: 10px;'>
                     <div class='col-3'>
                         Object 1:
@@ -273,6 +273,15 @@
             img.src = imgUrl;
         });
 
+        // Activate sentence buttons.
+        for (var key of ['sent1-btn', 'sent2-btn', 'sent3-btn', 'sent4-btn', 'sent5-btn', 'no_sent-btn']) {
+            $('#' + key).click(function (key) {
+                return function () {
+                    saveOption(key);
+                };
+            }(key));
+        }
+
         render();
     }
 
@@ -299,6 +308,8 @@
         $('#capt4').val(results[idx]['Objectname4']);
         $('#nr4').val(results[idx]['Objectnr4']);
 
+        // Setup the choice that the user already made.
+        render_verification_buttons();
 
         // Refresh the counter
         $('.counter-top').text(idx + 1);
@@ -325,51 +336,97 @@
         render();
     }
 
+    // Render the colors of the buttons to show that user the choice they made.
+    function render_verification_buttons() {
+        for (var key of ['sent1-btn', 'sent2-btn', 'sent3-btn', 'sent4-btn', 'sent5-btn']) {
+            if (results[idx]['sentence'] == document.getElementById(key).innerText) {
+                _helper_color_buttons(key);
+            } else {
+                _helper_default_buttons(key);
+            }
+        }
+        if (results[idx]['sentence'] == 'None') {
+            _helper_color_buttons('no_sent-btn');
+        } else {
+            _helper_default_buttons('no_sent-btn');
+        }
+    }
+
+    function _helper_color_buttons(key) {
+        $('#' + key).addClass('btn-success').removeClass('btn-secondary');
+    }
+
+    function _helper_default_buttons(key) {
+        $('#' + key).removeClass('btn-success').addClass('btn-secondary');
+    }
+
+    function saveOption(key) {
+        results[idx]['sentence'] = document.getElementById(key).innerText;
+        if (key == 'no_sent-btn') {
+            results[idx]['sentence'] = 'None'
+        }
+        render_verification_buttons();
+    }
+
     function saveCaption() {
-        var c = $('#capt1').val();
-        var n = $('#nr1').val();
-        if (!c || !n){
-            alert('Object 1 is not filled in completly.');
+        if (!results[idx]['sentence']) {
+            alert('No sentence selected.');
             return false;
         }
-        results[idx]['Objectname1'] = c;
-        results[idx]['Objectnr1'] = n;
+        if (results[idx]['sentence'] == 'None') {
+            results[idx]['Objectname1'] = null;
+            results[idx]['Objectnr1'] = null;
+            results[idx]['Objectname2'] = null;
+            results[idx]['Objectnr2'] = null;
+            results[idx]['Objectname3'] = null;
+            results[idx]['Objectnr3'] = null;
+            results[idx]['Objectname4'] = null;
+            results[idx]['Objectnr4'] = null;
+        } else {
+            var c = $('#capt1').val();
+            var n = $('#nr1').val();
+            if (!c || !n) {
+                alert('Object 1 is not filled in completely.');
+                return false;
+            }
+            results[idx]['Objectname1'] = c;
+            results[idx]['Objectnr1'] = n;
 
-        var c = $('#capt2').val();
-        var n = $('#nr2').val();
-        if (!c || !n){
-            alert('Object 2 is not filled in completly.');
-            return false;
-        }
-        results[idx]['Objectname2'] = c;
-        results[idx]['Objectnr2'] = n;
+            var c = $('#capt2').val();
+            var n = $('#nr2').val();
+            if (!c || !n) {
+                alert('Object 2 is not filled in completely.');
+                return false;
+            }
+            results[idx]['Objectname2'] = c;
+            results[idx]['Objectnr2'] = n;
 
-        var c = $('#capt3').val();
-        var n = $('#nr3').val();
-        if (c && !n){
-            alert('Object 3 is missing an object nr.');
-            return false;
-        }
-        if (!c && n){
-            alert('Object 3 is missing an sentence part.');
-            return false;
-        }
-        results[idx]['Objectname3'] = c;
-        results[idx]['Objectnr3'] = n;
+            var c = $('#capt3').val();
+            var n = $('#nr3').val();
+            if (c && !n) {
+                alert('Object 3 is missing an object nr.');
+                return false;
+            }
+            if (!c && n) {
+                alert('Object 3 is missing an sentence part.');
+                return false;
+            }
+            results[idx]['Objectname3'] = c;
+            results[idx]['Objectnr3'] = n;
 
-        var c = $('#capt4').val();
-        var n = $('#nr4').val();
-        if (c && !n){
-            alert('Object 4 is missing an object nr.');
-            return false;
+            var c = $('#capt4').val();
+            var n = $('#nr4').val();
+            if (c && !n) {
+                alert('Object 4 is missing an object nr.');
+                return false;
+            }
+            if (!c && n) {
+                alert('Object 4 is missing an sentence part.');
+                return false;
+            }
+            results[idx]['Objectname4'] = c;
+            results[idx]['Objectnr4'] = n;
         }
-        if (!c && n){
-            alert('Object 4 is missing an sentence part.');
-            return false;
-        }
-        results[idx]['Objectname4'] = c;
-        results[idx]['Objectnr4'] = n;
-
         return true;
     }
 
