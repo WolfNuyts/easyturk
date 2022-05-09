@@ -383,10 +383,19 @@
             results[idx]['Objectname4'] = null;
             results[idx]['Objectnr4'] = null;
         } else {
+            // TODO checks for annotation is part of selected image!!
             var c = $('#capt1').val();
             var n = $('#nr1').val();
             if (!c || !n) {
                 alert('Object 1 is not filled in completely.');
+                return false;
+            }
+            if (!results[idx]['sentence'].includes(c)) {
+                alert('The sentence part of object 1 does not occur in the selected sentence.');
+                return false;
+            }
+            if (isNaN(n)) {
+                alert('The object nr of object 1 is not a correct number.');
                 return false;
             }
             results[idx]['Objectname1'] = c;
@@ -396,6 +405,14 @@
             var n = $('#nr2').val();
             if (!c || !n) {
                 alert('Object 2 is not filled in completely.');
+                return false;
+            }
+            if (!results[idx]['sentence'].includes(c)) {
+                alert('The sentence part of object 2 does not occur in the selected sentence.');
+                return false;
+            }
+            if (isNaN(n) || n == results[idx]['Objectnr1']) {
+                alert('The object nr of object 2 is not a correct number.');
                 return false;
             }
             results[idx]['Objectname2'] = c;
@@ -411,6 +428,14 @@
                 alert('Object 3 is missing an sentence part.');
                 return false;
             }
+            if (c && !results[idx]['sentence'].includes(c)) {
+                alert('The sentence part of object 3 does not occur in the selected sentence.');
+                return false;
+            }
+            if (n && (isNaN(n) || n == results[idx]['Objectnr1'] || n == results[idx]['Objectnr2'])) {
+                alert('The object nr of object 3 is not a correct number.');
+                return false;
+            }
             results[idx]['Objectname3'] = c;
             results[idx]['Objectnr3'] = n;
 
@@ -422,6 +447,14 @@
             }
             if (!c && n) {
                 alert('Object 4 is missing an sentence part.');
+                return false;
+            }
+            if (c && !results[idx]['sentence'].includes(c)) {
+                alert('The sentence part of object 4 does not occur in the selected sentence.');
+                return false;
+            }
+            if (n && (isNaN(n) || n == results[idx]['Objectnr1'] || n == results[idx]['Objectnr2'] || n == results[idx]['Objectnr3'])) {
+                alert('The object nr of object 4 is not a correct number.');
                 return false;
             }
             results[idx]['Objectname4'] = c;
