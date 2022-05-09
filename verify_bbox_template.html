@@ -1,0 +1,991 @@
+<html>
+<head>
+  <title>Verify whether objects in pictures are accurate</title>
+  <!-- easyturk depends on these libraries -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js'></script>
+  <!-- end of required libraries -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js'></script>
+  <style>
+    #counter {
+      margin: 0 10px;
+      font-size: 20pt;
+      font-weight: bold;
+    }
+    img {
+      height: 600px;
+    }
+    img.example {
+      height: 200px;
+    }
+    .tasks-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #DBDBDB;
+    }
+    .examples-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #9fbccb;
+    }
+    .instructions-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #F0EAD6;
+    }
+    p {
+      font-size: 17px;
+      text-align: center;
+    }
+    li {
+        font-size: 22px;
+    }
+    div {
+        font-size: 22px;
+    }
+    button {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class='container instructions-container'>
+  <div id='instructions-section'>
+    <div class='instructions'>
+      <div class='row'>
+        <div class='col-12'>
+          <h1>Instructions</h1>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-12'>
+          <ul>
+            <li>Verify whether objects in pictures are accurate.</li>
+            <li>In this task, you will be shown a list of pictures and objects in them. Your task is to tell us:
+                <ul>
+                    <li>Whether the name of the object is correct. (For example, if someone marked a "person" as a "car", tell us that the name is wrong.)</li>
+                    <li>Whether the box covers multiple objects or a single object. (For example, if the object is a "person", tell us if the box covers multiple people or just one person. If the box mainly covers one person but part of another person is in the box, then just say that it covers one person.)</li>
+                    <li>Whether the box is too loose or excludes some parts of the object. (For example, if the box doesn't cover the "person" completely and their hand is outside the box.</li>
+                </ul>
+            </li>
+            <li>
+              Each box should be <b>tight</b> around its object, and should <b>completely cover</b> the object.
+              <div class='row text-center'>
+                <div class='col-4 bbox-example bg-success'>
+                  <b>Good:</b>
+                  <br>
+                  <img class='img-fluid' src='https://visualgenome.org/static/images/bounding_box_examples/tight_correct.jpg'>
+                </div>
+                <div class='col-4 bbox-example bg-danger'>
+                  <b>Bad:</b>
+                  <br>
+                  <img class='img-fluid' src='https://visualgenome.org/static/images/bounding_box_examples/tight_wrong1.jpg'>
+                </div>
+                <div class='col-4 bbox-example bg-danger'>
+                  <b>Bad:</b>
+                  <br>
+                  <img class='img-fluid' src='https://visualgenome.org/static/images/bounding_box_examples/tight_wrong2.jpg'>
+                </div>
+              </div>
+            </li>
+            <li>
+              Each box should only cover the <b>visible part</b> of all objects mentioned in the text snippet.
+              <div class='row text-center'>
+                <div class='col-4 col-offset-2 bbox-example bg-success'>
+                  <b>Good:</b>
+                  <br>
+                  <img class='img-fluid' src='https://visualgenome.org/static/images/bounding_box_examples/vis_correct.jpg'>
+                </div>
+                <div class='col-4 bbox-example bg-danger'>
+                  <b>Bad:</b>
+                  <br>
+                  <img class='img-fluid' src='https://visualgenome.org/static/images/bounding_box_examples/vis_wrong.jpg'>
+                </div>
+              </div>
+            </li>
+            <li>
+              Objects that take up a large portion of the image should be <b>completey covered</b>
+              by their boxes, such as the boxes for the <b>road</b> below:
+              <div class='row text-center'>
+                <div class='col-4 col-offset-2 bbox-example bg-success'>
+                  <b>Good:</b>
+                  <br>
+                  <img class='img-fluid' src='https://visualgenome.org/static/images/bounding_box_examples/large-good.png'>
+                </div>
+                <div class='col-4 bbox-example bg-danger'>
+                  <b>Bad:</b>
+                  <br>
+                  <img class='img-fluid' src='https://visualgenome.org/static/images/bounding_box_examples/large-bad.png'>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class='container tasks-container'>
+  <div class='container'>
+    <h2>Here are the objects and pictures we would like you to verify:</h2>
+  </div>
+
+  <div class='container-fluid'>
+    <div class='row'>
+      <div class='col-12'>
+        <div id='image-container'>
+        </div>
+      </div>
+    </div>
+    <br />
+    <br />
+    <div class='row justify-content-center'>
+      <div class='col-6'>
+        <h3>Answer the three questions below.</h3>
+        <h2>The name of the object is <span id='object-name' style='color: red;'></span></h2>
+        <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+            <div class='col-4'>
+                <button id='wrong-name-btn' class='btn btn-lg btn-secondary'>Wrong name</button>
+            </div>
+            <div class='col-4'>
+            </div>
+            <div class='col-4'>
+                <button id='correct-name-btn' class='btn btn-lg btn-secondary'>Correct name</button>
+            </div>
+        </div>
+        <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+            <div class='col-4'>
+                <button id='wrong-multi-btn' class='btn btn-lg btn-secondary'>Has multiple objects</button>
+            </div>
+            <div class='col-4'>
+            </div>
+            <div class='col-4'>
+                <button id='correct-multi-btn' class='btn btn-lg btn-secondary'>Has one object</button>
+            </div>
+        </div>
+        <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+            <div class='col-4'>
+                <button id='wrong-box-btn' class='btn btn-lg btn-secondary'>Box is bad</button>
+            </div>
+            <div class='col-4'>
+            </div>
+            <div class='col-4'>
+                <button id='correct-box-btn' class='btn btn-lg btn-secondary'>Box is good</button>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class='row justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+      <div class='col-2'>
+        <button id='prev-btn' class='btn btn-lg btn-primary' disabled>Back</button>
+      </div>
+      <div class='col-2'>
+        <span id='counter'>
+          <span class='counter-top'></span> / <span class='counter-bottom'></span>
+        </span>
+      </div>
+      <div class='col-2'>
+        <button id='next-btn' class='btn btn-lg btn-primary' disabled>Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--IMPORTANT: This import contains all the functions you need to read in your input data and send back worker outputs.-->  
+<script type='text/json' id='input'>
+  
+</script>
+<form id='results-form' method='post' action='dummy' class='text-center'>
+  <input type='hidden' value='' name='assignmentId' id='assignmentId'/>
+  <input type='hidden' value='' name='output' id='output'/>
+  <input type='submit' class='btn btn-lg btn-success' id='submit-btn' value='Submit' disabled/>          
+</form>
+<script>
+  var easyturk = (function() {
+    
+    // Copied from http://james.padolsey.com/javascript/bujs-1-getparameterbyname/
+    function getUrlParam(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
+    }
+
+    function getInput(default_input) {
+      if (typeof(default_input) === 'undefined') default_input = null;
+      try {
+        return JSON.parse($('#input').html());
+      } catch (e) {
+        return default_input;
+      }
+    }
+
+    function setOutput(output) {
+      $('#output').val(JSON.stringify(output));
+    }
+
+    function isPreview() {
+      return false;
+      var assignment_id = getUrlParam('assignmentId');
+      if (assignment_id === null) return false;
+      return assignment_id == 'ASSIGNMENT_ID_NOT_AVAILABLE';
+    }
+
+    function setupSubmit() {
+      var submit_to = getUrlParam('turkSubmitTo');
+      $('#results-form').attr('action', submit_to + '/mturk/externalSubmit');                      
+      $('#assignmentId').val(getUrlParam('assignmentId'));
+    }
+
+    return {
+      getInput: getInput,
+      setOutput: setOutput,
+      isPreview: isPreview,
+      setupSubmit: setupSubmit,
+    }
+
+  })();
+</script>
+<script>
+    /**This file enables utility functions for drawing and displaying bounding boxes on images.
+ *
+ * Requirements:
+ *     - JQuery
+ */
+
+var ETJS = (function(etjs) {
+
+    etjs.BBoxDrawer = function(div, image_url, canvas_width, options) {
+        /**Initialize the bbox drawing utility tool.
+         *
+         * Args:
+         *     div: The HTML element where the drawer will be initialized.
+         *     image_url: The image to display in that div.
+         *     canvas_width: The width of the image to be displayed.
+         *     options: A dictionary of possible customizations. Check DEFAULT_OPTIONS above.
+         */
+
+        var DEFAULT_OPTIONS = {
+            static_box_color: '#f00',
+            bbox_color: '#ff0',
+            bbox_line_width: 2.0,
+            click_radius: 15,
+            handle_opacity: 0.2,
+            dot_small_radius: 5,
+            dot_big_radius: 10,
+            image_opacity: 1.0,
+            max_height: null,
+            max_width: null,
+            image_width: null,
+            callback: function() {},
+            text_box_padding: 4,
+            text_font_size: 20,
+            text_font: 20 + 'px sans-serif',
+        };
+        var that = (this === etjs ? {} : this);
+
+        that.merge_options = function(options, default_options) {
+            if (typeof(options) === 'undefined') {
+                  options = {};
+            }
+
+            for (var opt in default_options) {
+                if (default_options.hasOwnProperty(opt)
+                    && !options.hasOwnProperty(opt)) {
+                    options[opt] = default_options[opt];
+                }
+            }
+            return options;
+        }
+
+        options = that.merge_options(options, DEFAULT_OPTIONS);
+
+        var scale = null;
+        var canvas = null;
+        var canvas_pos = null;
+        var ctx = null;
+
+        // Most recent positions of the mouse and of a click.
+        var click_pos = null;
+        var mouse_pos = null;
+
+        // Whether the box has been been finalized after the initial drag.
+        var bbox_drawn = false;
+
+        // Object with properties x, y, w, h.
+        var bbox = null;
+        var static_boxes = [];
+
+        var object_pos = null;
+        var object_name = null;
+
+        var resize_direction = null;
+        var old_bbox = null;
+
+        var disabled = true;
+
+        var cursors = {
+            'UL': 'nw-resize',
+            'UR': 'ne-resize',
+            'BL': 'sw-resize',
+            'BR': 'se-resize',
+            'U': 'n-resize',
+            'R': 'e-resize',
+            'L': 'w-resize',
+            'B': 's-resize',
+        };
+
+        var img = new Image();
+        img.onload = setup;
+        img.src = image_url;
+
+        that.getBoxPosition = function() {
+            /** Scales and returns the bbox location relative to the original image size.
+             *
+             * Returns:
+             *   A dictionary containing x, y, w and h.
+             */
+            if (bbox) {
+                // Convert to image coordinates
+                return {
+                    'x': Math.floor(toImageCoords(bbox.x)),
+                    'y': Math.floor(toImageCoords(bbox.y)),
+                    'w': Math.floor(toImageCoords(bbox.w)),
+                    'h': Math.floor(toImageCoords(bbox.h))
+                };
+
+            }
+            return null;
+        }
+
+        that.setBoxPosition = function(b) {
+            /** Set the bbox position and draws the bbox.
+             *
+             * Args:
+             *     b: A bbox with x, y, w, h values.
+             */
+            scale = choose_scale(img)
+            bbox = {};
+            bbox.x = Math.floor(toCanvasCoords(b.x));
+            bbox.y = Math.floor(toCanvasCoords(b.y));
+            bbox.w = Math.floor(toCanvasCoords(b.w));
+            bbox.h = Math.floor(toCanvasCoords(b.h));
+            draw();
+        }
+
+        that.enable = function() {
+            disabled = false;
+            draw();
+        }
+
+        that.disable = function() {
+            disabled = true;
+            mouseup();
+            draw();
+        }
+
+        that.setObject = function(x, y, name) {
+            /** Set the object location and name.
+             *
+             *  Args:
+             *      x: The x co-ordinate.
+             *      y: The y co-ordinate.
+             *      name: The text of the object.
+             */
+            if (scale) {
+                object_pos = {'x': toCanvasCoords(x), 'y': toCanvasCoords(y)};
+            } else {
+                object_pos = {'x': x, 'y': y};
+            }
+            object_name = name;
+        }
+
+        that.addStaticBox = function(box) {
+            /** Set the object location and name.
+             *
+             *  Args:
+             *      box: A dictionary containing x, y, w, h.
+             *
+             *  Returns:
+             *      Index of static box so that the user can delete it if needed.
+             */
+            static_box = {}
+            static_box.x = box.x;
+            static_box.y = box.y;
+            static_box.w = box.w;
+            static_box.h = box.h;
+            if (box.color != null) {
+                static_box.color = box.color;
+            }
+            //scale = choose_scale(img);
+            if (scale) {
+                static_box.x = toCanvasCoords(box.x);
+                static_box.y = toCanvasCoords(box.y);
+                static_box.w = toCanvasCoords(box.w);
+                static_box.h = toCanvasCoords(box.h);
+            }
+            static_boxes.push(static_box);
+            draw();
+            return static_boxes.length - 1;
+        }
+
+        that.removeStaticBox = function(index) {
+            /** Deletes the static box at that index.
+             *
+             *  Args:
+             *      index: Index of static box to delete.
+             */
+            if (static_boxes.length <= index) return;
+            static_boxes.splice(index, 1);
+        }
+
+        function choose_scale(img) {
+            /** Helper function to scale the images based on canvas width.
+             *
+             * Args:
+             *     img: The image element.
+             */
+            if (_.isNumber(options.max_width) && _.isNumber(options.max_height)) {
+                var scale_h = img.width / options.max_width;
+                var scale_v = img.height / options.max_height;
+                return Math.max(scale_h, scale_v);
+            } else {
+                return img.width / canvas_width;
+            }
+        }
+
+        that.restoring = function() {
+            /** Sets the bbox to be drawn.
+             */
+            bbox_drawn = true;
+        }
+
+        that.removeBox = function() {
+            bbox = null;
+            draw();
+        }
+
+        that.reset = function() {
+            /** Reset everything to no boxes and get the crosshairs.
+             */
+            click_pos = null;
+            mouse_pos = null;
+            bbox_drawn = false;
+            bbox = null;
+            static_boxes = [];
+            object_pos = null;
+            object_name = null;
+            resize_direction = null;
+            old_bbox = null;
+            $("#drawcanv").css({'cursor': 'crosshair'}); // reset cursor
+            draw();
+        }
+
+        function setup() {
+            /* Setup the drawing and draw the object and bbox if already set.
+             */
+            scale = choose_scale(img);
+            canvas_width = img.width / scale;
+            var canvas_height = img.height / scale;
+            canvas = $('<canvas>')
+                    .attr({'width': canvas_width,
+                           'height': canvas_height})
+                    .attr('id', 'drawcanv')
+                    .css({'cursor': 'crosshair'})
+                    .appendTo(div);
+
+            canvas_pos = {'x': canvas.offset().left,
+                          'y': canvas.offset().top};
+            ctx = canvas[0].getContext('2d');
+            canvas.mousemove(mousemove);
+            canvas.mousedown(mousedown);
+            canvas.mouseup(mouseup);
+            canvas.mouseout(mouseup);
+
+            if (object_pos) {
+                object_pos.x = toCanvasCoords(object_pos.x);
+                object_pos.y = toCanvasCoords(object_pos.y);
+            }
+
+            // Convert the static box from image coordinates to canvas coordinates
+            for (var k = 0; k < static_boxes.length; k++) {
+                static_box = static_boxes[k];
+                var props = ['x', 'y', 'w', 'h'];
+                for (var i = 0; i < props.length; i++) {
+                    static_box[props[i]] = toCanvasCoords(static_box[props[i]]);
+                }
+            }
+
+            draw();
+            options.callback();
+        }
+
+        function toCanvasCoords(x) { return x / scale; }
+        function toImageCoords(x) { return x * scale; }
+        function setCursor(cursor) { canvas.css('cursor', cursor); }
+
+        function getPosition(e) {
+            var x = e.pageX - canvas_pos.x;
+            var y = e.pageY - canvas_pos.y;
+            return {'x': x, 'y': y};
+        }
+
+        function mousedown(e) {
+            if (disabled) return;
+            click_pos = getPosition(e);
+            if (bbox) {
+                resize_direction = detectCollision(click_pos.x, click_pos.y, bbox);
+                if (resize_direction) {
+                    old_bbox = $.extend({}, bbox);
+                }
+            }
+        }
+
+        function mouseup(e) {
+            click_pos = null;
+            resize_direction = null;
+            if (bbox) {
+                bbox_drawn = true;
+                setCursor('pointer');
+            }
+            draw();
+        }
+
+        function mousemove(e) {
+            mouse_pos = getPosition(e);
+            updateBBox();
+
+            if (bbox && !click_pos && !disabled) {
+                var collision = detectCollision(mouse_pos.x, mouse_pos.y, bbox);
+                if (cursors.hasOwnProperty(collision)) {
+                    setCursor(cursors[collision]);
+                } else {
+                    setCursor('pointer');
+                }
+            }
+
+            draw();
+        }
+
+        function detectCollision(x, y, box) {
+            function dist(x1, y1, x2, y2) {
+                var dx = x2 - x1;
+                var dy = y2 - y1;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            if (dist(x, y, box.x, box.y) < options.click_radius) {
+                return 'UL';
+            } else if (dist(x, y, box.x + box.w, box.y) < options.click_radius) {
+                return 'UR';
+            } else if (dist(x, y, box.x, box.y + box.h) < options.click_radius) {
+                return 'BL';
+            } else if (dist(x, y, box.x + box.w, box.y + box.h)
+                     < options.click_radius) {
+            return 'BR';
+            } else if (Math.abs(box.x - x) < options.click_radius) {
+                return 'L';
+            } else if (Math.abs(box.x + box.w - x) < options.click_radius) {
+                return 'R';
+            } else if (Math.abs(box.y - y) < options.click_radius
+                       && x >= bbox.x && x <= bbox.x + bbox.w) {
+                return 'U';
+            } else if (Math.abs(box.y + box.h - y) < options.click_radius
+                       && y >= bbox.y && y <= bbox.y + bbox.h) {
+                return 'B';
+            }
+            return null;
+        }
+
+        function updateBBox() {
+            function makeBBox(x1, y1, x2, y2) {
+                var x = Math.min(x1, x2);
+                var y = Math.min(y1, y2);
+                var w = Math.max(x1, x2) - x;
+                var h = Math.max(y1, y2) - y;
+                return {'x': x, 'y': y, 'w': w, 'h': h};
+            }
+            if (!bbox_drawn && click_pos && mouse_pos) {
+                bbox = makeBBox(click_pos.x, click_pos.y, mouse_pos.x, mouse_pos.y);
+            } else if (bbox_drawn && click_pos && mouse_pos && resize_direction) {
+                var x1 = old_bbox.x;
+                var x2 = old_bbox.x + old_bbox.w;
+                var y1 = old_bbox.y;
+                var y2 = old_bbox.y + old_bbox.h;
+                if (resize_direction === 'L'
+                    || resize_direction === 'UL'
+                    || resize_direction === 'BL') {
+                    x1 = mouse_pos.x;
+                }
+                if (resize_direction === 'R'
+                    || resize_direction === 'UR'
+                    || resize_direction === 'BR') {
+                    x2 = mouse_pos.x;
+                }
+                if (resize_direction === 'U'
+                    || resize_direction === 'UR'
+                    || resize_direction === 'UL') {
+                    y1 = mouse_pos.y;
+                }
+                if (resize_direction === 'B'
+                    || resize_direction === 'BR'
+                    || resize_direction === 'BL') {
+                    y2 = mouse_pos.y;
+                }
+                bbox = makeBBox(x1, y1, x2, y2);
+            }
+        }
+
+        function drawBox(box, box_color) {
+            ctx.save();
+
+            function r(x) { return Math.floor(x); }
+
+            ctx.strokeStyle = box_color;
+            ctx.lineWidth = options.bbox_line_width;
+            ctx.strokeRect(r(box.x), r(box.y), r(box.w), r(box.h));
+
+            ctx.restore();
+        }
+
+        function drawCrosshair(x, y) {
+            y = Math.floor(y) + 0.5;
+            x = Math.floor(x) + 0.5;
+
+            ctx.save();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#fff';
+            ctx.globalAlpha = 0.3;
+
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height());
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width(), y);
+            ctx.stroke();
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#000';
+            ctx.globalAlpha = 1.0;
+
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height());
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width(), y);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawHandle(x, y) {
+            ctx.save();
+            ctx.globalAlpha = options.handle_opacity;
+
+            ctx.beginPath();
+            ctx.arc(x, y, options.click_radius, 0, 2 * Math.PI);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawObject(x, y, name, emphasized) {
+            ctx.save();
+            ctx.fillStyle = options.bbox_color;
+
+            var r = emphasized ? options.dot_big_radius : options.dot_small_radius;
+
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, 2 * Math.PI);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+              
+            if (emphasized) {
+                // Draw the text box
+                var width = ctx.measureText(name).width;
+
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000';
+                ctx.beginPath();
+                var x1 = x - width - TEXT_BOX_PADDING;
+                var x2 = x + width + TEXT_BOX_PADDING;
+                var y1 = y + options.dot_big_radius + 1.5 * TEXT_BOX_PADDING;
+                var y2 = y1 + 1.5 * TEXT_BOX_PADDING + TEXT_FONT_SIZE;
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x1, y2);
+                ctx.lineTo(x2, y2);
+                ctx.lineTo(x2, y1);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.font = TEXT_FONT;
+                ctx.fillStyle = '#000';
+                var tx = x - width;
+                var ty = y + TEXT_FONT_SIZE + 2.5 * TEXT_BOX_PADDING + options.dot_big_radius;
+                ctx.fillText(name, tx, ty);
+            }
+
+            ctx.restore();
+        }
+
+    function draw() {
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, canvas.width(), canvas.height());
+      ctx.save();
+      ctx.globalAlpha = options.image_opacity;
+      ctx.drawImage(img, 0, 0, canvas.width(), canvas.height());
+      ctx.restore();
+
+      for (var k = 0; k < static_boxes.length; k++) {
+          static_box = static_boxes[k];
+          box_color = options.static_box_color;
+          if (static_box.color != null) {
+              box_color = static_box.color;
+          }
+          drawBox(static_box, box_color);
+      }
+
+      if (object_name && object_pos) {
+          var emphasized = false;
+          if (mouse_pos) {
+              var dx = mouse_pos.x - object_pos.x;
+              var dy = mouse_pos.y - object_pos.y;
+              if (Math.sqrt(dx * dx + dy * dy) < options.click_radius) {
+                  emphasized = true;
+              }
+          }
+
+          drawObject(object_pos.x, object_pos.y, object_name, emphasized);
+      }
+
+      if (disabled) return;
+
+      if (bbox) {
+          if (bbox_drawn) {
+              drawHandle(bbox.x, bbox.y);
+              drawHandle(bbox.x + bbox.w, bbox.y);
+              drawHandle(bbox.x, bbox.y + bbox.h);
+              drawHandle(bbox.x + bbox.w, bbox.y + bbox.h);
+          } else {
+              drawCrosshair(bbox.x, bbox.y);
+              drawCrosshair(bbox.x + bbox.w, bbox.y + bbox.h);
+          }
+          drawBox(bbox, options.bbox_color);
+      } else if (mouse_pos) {
+          drawCrosshair(mouse_pos.x, mouse_pos.y);
+      }
+    }
+
+    that.remove = function() {
+        /** Delete the canvas.
+         */
+        canvas.remove();
+    }
+
+    return that;
+  }
+
+  return etjs;
+
+}(ETJS || {}));
+</script>
+
+<script>
+    // Define some default input.
+    // It is good practice to define standard inputs for a task which will be overwritten when launching
+    // your actual task. The default inputs allow you to render and debug your task locally.
+    var DEFAULT_INPUT = [{"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160052.jpg",
+                          "name": "object name 1",
+                          "box": {"x": 20, "y": 10, "w": 100, "h": 200}},
+                         {"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160053.jpg",
+                          "name": "object name 2",
+                          "box": {"x": 90, "y": 30, "w": 150, "h": 100}}]
+
+    var input = null;
+
+    // This is where we will be collecting the verifications for each image;
+    var options = [];
+
+    // Some variables to track state of the HIT.
+    var idx = 0;
+    var enabled = false;
+    var bb = null; // Bounding box drawing object.
+
+    function main() {
+      // If this is a HIT on AMT, then replace the default input with the real
+      // input.
+      input = easyturk.getInput(DEFAULT_INPUT);
+
+      // Enable the task.
+      if (!easyturk.isPreview()){
+        enableTask();
+      }
+
+      // Set up the correct.
+      _.each(input, function() { options.push({
+          'name': null,
+          'box': null,
+          'multi': null
+      }); });
+
+      // Preload all images
+      _.each(input, function(input_elem) {
+        var imgUrl = input_elem['url'];
+        var img = new Image();
+        img.onload = function() { console.log('loaded image from ' + imgUrl); };
+        img.src = imgUrl;
+      });
+
+      // Activate verification buttons.
+      for (var key in options[idx]) {
+          $('#correct-' + key + '-btn').click(function(key) {
+              return function() {
+                  saveOption(key, true);
+              };
+          }(key));
+          $('#wrong-' + key + '-btn').click(function(key) {
+              return function() {
+                  saveOption(key, false);
+              }
+          }(key));
+      }
+
+
+      render();
+    }
+
+    // Use the current index to update the image and description
+    function render() {
+        // Draw the bounding box.
+        if (bb != null) {
+            bb.disable();
+            bb.remove();
+        }
+        $('#image-container').empty();
+        bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 1000);
+        bb.reset();
+        bb.addStaticBox(input[idx].box);
+
+        // Set up the input text field
+        $('#object-name').text(input[idx].name);
+  
+        // Refresh the counter
+        $('.counter-top').text(idx + 1);
+        $('.counter-bottom').text(input.length);
+
+        // Setup the choice that the user already made.
+        render_verification_buttons();
+
+        // If the UI is enabled, enable or disable the buttons depending on
+        // the index.
+        if (enabled) {
+            $('#prev-btn').prop('disabled', false);
+            $('#next-btn').prop('disabled', false);
+            if (idx == 0) {
+                $('#prev-btn').prop('disabled', true);
+            }
+            if (idx == input.length - 1) {
+                $('#next-btn').prop('disabled', true);
+            }
+        }
+    }
+
+    function _helper_color_buttons(option, success_id, danger_id) {
+        if (option) {
+            $(success_id).removeClass('btn-secondary').addClass('btn-success');
+            $(danger_id).removeClass('btn-danger').addClass('btn-secondary');
+        } else {
+            $(success_id).removeClass('btn-success').addClass('btn-secondary');
+            $(danger_id).removeClass('btn-secondary').addClass('btn-danger');
+        }
+    }
+
+    function _helper_default_buttons(button_id) {
+        $(button_id).removeClass('btn-danger')
+                    .removeClass('btn-success')
+                    .addClass('btn-secondary');
+    }
+
+    // Render the colors of the buttons to show that user the choice they made.
+    function render_verification_buttons() {
+        for (var key in options[idx]) {
+            if (options[idx][key] != null) {
+                _helper_color_buttons(options[idx][key], '#correct-' + key + '-btn', '#wrong-' + key + '-btn');
+            } else {
+                _helper_default_buttons('#correct-' + key + '-btn');
+                _helper_default_buttons('#wrong-' + key + '-btn');
+            }
+        }
+    }
+
+    // Update the index, and save the text in the text area.
+    function setIdx(newIdx) {
+        if (newIdx < 0 || newIdx >= input.length) return;
+        idx = newIdx;
+        render();
+    }
+
+    function saveOption(key, correct) {
+        options[idx][key] = correct;
+        render_verification_buttons();
+    }
+
+    // Enable the UI.
+    function enableTask() {
+        enabled = true;
+        easyturk.setupSubmit();
+
+        // Enable components
+        $('#next-btn').click(function() {
+            setIdx(idx + 1);
+        });
+        $('#prev-btn').click(function() {
+            setIdx(idx - 1);
+        });
+        $('#submit-btn').prop('disabled', false);
+
+        $('#submit-btn').click(function() {
+            // Make sure to save the last one.
+            for (var i = 0; i < input.length; i++) {
+                for (var key in options[i]) {
+                    if (options[i][key] == null) {
+                        alert('You did not verify image #' + (i+1));
+                        return false;
+                    }  
+                }
+            }
+
+        // Copy the options to the output we will return to the requester.
+        var output = input;
+        for (var i = 0; i < output.length; i++) {
+            output[i].option = {}
+            for (var key in options[i]) {
+                output[i].option[key] = options[i][key];
+            }
+        }
+        if (easyturk.isPreview()) {
+            alert("This is only a preview. Here is your output: \n" + JSON.stringify(output));
+            return false;
+        } else {
+            easyturk.setOutput(output);
+            return true;
+        }
+      });
+    }
+
+    main();
+</script>
+</body>
+</html>
