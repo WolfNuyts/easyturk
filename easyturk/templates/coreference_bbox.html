@@ -77,8 +77,60 @@
                     <ul>
                         <li>Annotate bounding boxes with their corresponding sentence parts.</li>
                         <li>In this task, you will be shown a picture with bounding boxes around detected objects and
-                            your task is to select a sentence that mentions atleast 2 objects (if there exist any) and
-                            then indicate which part of the sentence relates to which bounding box
+                            your task is to:
+                            <ul>
+                                <li> Select one of the possible sentences that has at least two distinct sentence parts, each referring to 1 or more distinct detected objects in the image. If none of the 5 sentences contains 2 sentence parts referring to 2 distinct detected objects, select 'No sentence with 2 detected objects'. </li>
+                                <li> Indicate which part of the selected sentence relates to which bounding box. If there wasn't a sentence with 2 distinct detected objects, you can skip this step.</li>
+                            </ul>
+                        </li>
+                        <li>The bounding box number is always located in the top-left corner of the bounding box.</li>
+                        <li>Make sure that you select the whole part of the sentence that is referenced, e.g. for the sentence:
+                            <ul>
+                                <li> <b> There is a man with a red shirt next to a big truck. </b>
+                                    <ul>
+                                        <li style="color:red">wrong: man </li>
+                                        <li style="color:red">wrong: a man </li>
+                                        <li style="color:green">correct: a man with a red shirt</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>If there is a sentence part that corresponds to multiple detected objects of the <b>same type</b> (e.g., person, car, horse), you can link that sentence part to multiple object numbers. Separate the object numbers with a comma, e.g., '1,2,3'. Omit quantifiers ('one', 'two', 'group of') from the sentence part you enter.</li>
+                        <li>If there is a sentence part that corresponds to multiple detected objects of <b>different types</b>, please do not use this sentence part.</li>
+                        <li>Two distinct sentence parts may refer to boxes of the same or distinct types, as long as they are distinct boxes.</li>
+                        <li>Examples:
+                            <ul>
+                                <li style="margin-bottom: 15px"><b>Sentence:</b> 'A group of young persons riding horses.'
+                                    <br> <b>Image:</b> has 2 boxes of persons (numbers 1, 2) riding 2 horses, and 2 boxes around the horses, with numbers 3 and 4 (and potentially other boxes that are not relevant to the sentence).
+                                    <ul>
+                                        <li> <b>Solution:</b> link 'young persons' to boxes '1,2' and 'horses' to boxes '3,4' </li>
+                                    </ul>
+                                </li>
+                                <li style="margin-bottom: 15px"><b>Sentence:</b> 'A group of young persons riding horses.'
+                                    <br> <b>Image:</b> has 2 boxes of persons (numbers 1, 2) riding 2 horses, and no boxes around any horses.
+                                    <ul>
+                                        <li> <b>Solution:</b> use another sentence or skip this image, if there is no other sentence that has 2 sentence parts referring to 2 distinct objects. </li>
+                                    </ul>
+                                </li>
+                                <li style="margin-bottom: 15px"><b>Sentence:</b> 'A person is working in a kitchen.'
+                                    <br> <b>Image:</b> has a box around a person and boxes around a refrigerator, an oven and a microwave oven.
+                                    <ul>
+                                        <li> <b>Solution:</b> use another sentence or skip this image. </li>
+                                    </ul>
+                                </li>
+                                <li style="margin-bottom: 15px"><b>Sentence:</b> 'A person is playing soccer with another person.'
+                                    <br> <b>Image:</b> has a box (number 1) around a child playing soccer with another person, that also has a box (number 2).
+                                    <ul>
+                                        <li> <b>Solution:</b> link 'a person' with box '1', and 'another person' with box '2'. </li>
+                                    </ul>
+                                </li>
+                                <li><b>Sentence:</b> 'A person holds a teddy bear against their body.'
+                                    <br> <b>Image:</b> has a box around the person (box 1) and around the teddy bear (box 2).
+                                    <ul>
+                                        <li> <b>Solution:</b> do not link both 'a person' and 'their body' to box 1. Link 'a person' with box 1 and 'a teddy bear' with box 2. </li>
+                                    </ul>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
@@ -89,6 +141,7 @@
 
 <div class='container tasks-container'>
     <div class='container'>
+        <h1 id='exampletag' style="color:red"> Example:<h1>
         <h2>Here are the pictures and the numbered bounding boxes:</h2>
     </div>
 
@@ -105,10 +158,10 @@
 
         <div class='row'>
             <div class='col-12'>
-                <h2>Pick a sentence with atleast 2 detected objects in it: </h2>
+                <h2>Pick a sentence with at least 2 detected objects in it: </h2>
                 <div class='row' style='margin-top: 1px; padding-bottom: 1px;'>
                     <div class='col-4'>
-                        <button id='sent1-btn' class='btn btn-lg btn-secondary'>This is a sentence with atleast twenty
+                        <button id='sent1-btn' class='btn btn-lg btn-secondary'>This is a sentence with at least twenty
                             words, so it is an example of a very very extremely long sentence!
                         </button>
                     </div>
@@ -145,7 +198,7 @@
 
         <div class='row' style="margin-top: 30px">
             <div class='col-12'>
-                <h2>Annotate all the detected objects that occur in the chosen sentence:</h2>
+                <h2>Annotate which sentence part corresponds to which detected object in the image:</h2>
                 <div class='row' style='margin-top: 10px; padding-bottom: 10px;'>
                     <div class='col-3'>
                         Object 1:
@@ -155,8 +208,8 @@
                                   placeholder="sentence part"></textarea>
                     </div>
                     <div class='col-2'>
-                        <textarea type="text" name="caption" id='nr1' rows="1" cols='8'
-                                  placeholder="object nr"></textarea>
+                        <textarea type="text" name="caption" id='nr1' rows="1" cols='12'
+                                  placeholder="object nr(s)"></textarea>
                     </div>
                 </div>
                 <div class='row' style='margin-top: 10px; padding-bottom: 10px;'>
@@ -168,8 +221,8 @@
                                   placeholder="sentence part"></textarea>
                     </div>
                     <div class='col-2'>
-                        <textarea type="text" name="caption" id='nr2' rows="1" cols='8'
-                                  placeholder="object nr"></textarea>
+                        <textarea type="text" name="caption" id='nr2' rows="1" cols='12'
+                                  placeholder="object nr(s)"></textarea>
                     </div>
                 </div>
                 <div class='row' style='margin-top: 10px; padding-bottom: 10px;'>
@@ -181,8 +234,8 @@
                                   placeholder="sentence part"></textarea>
                     </div>
                     <div class='col-2'>
-                        <textarea type="text" name="caption" id='nr3' rows="1" cols='8'
-                                  placeholder="object nr"></textarea>
+                        <textarea type="text" name="caption" id='nr3' rows="1" cols='12'
+                                  placeholder="object nr(s)"></textarea>
                     </div>
                 </div>
                 <div class='row' style='margin-top: 10px; padding-bottom: 10px;'>
@@ -194,8 +247,8 @@
                                   placeholder="sentence part"></textarea>
                     </div>
                     <div class='col-2'>
-                        <textarea type="text" name="caption" id='nr4' rows="1" cols='8'
-                                  placeholder="object nr"></textarea>
+                        <textarea type="text" name="caption" id='nr4' rows="1" cols='12'
+                                  placeholder="object nr(s)"></textarea>
                     </div>
                 </div>
             </div>
@@ -221,11 +274,11 @@
     // It is good practice to define standard inputs for a task which will be overwritten when launching
     // your actual task. The default inputs allow you to render and debug your task locally.
     var DEFAULT_INPUT = [{
-        "url": "https://cs.stanford.edu/people/rak248/VG_100K/1160052.jpg",
+        "url": "https://mturk-coco-coref.s3.eu-west-3.amazonaws.com/images/1000.jpg",
         "sentences": ['This is sentence 1', 'This is sentence 2', 'This is sentence 3', 'This is sentence 4', 'This is sentence 5']
     },
         {
-            "url": "https://cs.stanford.edu/people/rak248/VG_100K/1160053.jpg",
+            "url": "https://mturk-coco-coref.s3.eu-west-3.amazonaws.com/images/1268.jpg",
             "sentences": ['This is the first sentence', 'This is sentence 2', 'This is sentence 3', 'This is sentence 4', 'This is sentence 5']
         }]
 
@@ -241,7 +294,10 @@
     function main() {
         // If this is a HIT on AMT, then replace the default input with the real
         // input.
-        input = easyturk.getInput(DEFAULT_INPUT);
+        input = [{
+            "url": "https://mturk-coco-coref.s3.eu-west-3.amazonaws.com/images/4495.jpg",
+            "sentences": ['a corner of a living room with a tv in it.', 'a very simple living area with a sofa.', 'A room with 2 couches in front of a television.', 'A normal room with a tv on a table.', 'a room with a tv and some different types of couches']
+        }].concat(easyturk.getInput(DEFAULT_INPUT));
 
         // Enable the task.
         if (!easyturk.isPreview()) {
@@ -262,6 +318,13 @@
                 'Objectnr4': null,
             });
         });
+
+        results[idx]['sentence'] = 'A room with 2 couches in front of a television.'
+        results[idx]['Objectname1'] = 'couches'
+        results[idx]['Objectnr1'] = '2,3'
+        results[idx]['Objectname2'] = 'a television'
+        results[idx]['Objectnr2'] = '1'
+
 
         // Preload all images
         _.each(input, function (input_elem) {
@@ -287,6 +350,12 @@
 
     // Use the current index to update the image and description
     function render() {
+        if (idx==0){
+            document.getElementById('exampletag').style.display = 'inline';
+        } else {
+            document.getElementById('exampletag').style.display = 'none';
+        }
+
         // Set up the image
         $('#image-container').empty();
         $("<img style='width:100%; height:auto;'>").attr('src', input[idx]['url']).appendTo($('#image-container'));
@@ -312,8 +381,8 @@
         render_verification_buttons();
 
         // Refresh the counter
-        $('.counter-top').text(idx + 1);
-        $('.counter-bottom').text(input.length);
+        $('.counter-top').text(idx);
+        $('.counter-bottom').text(input.length - 1);
 
         // If the UI is enabled, enable or disable the buttons depending on
         // the index.
@@ -383,21 +452,27 @@
             results[idx]['Objectname4'] = null;
             results[idx]['Objectnr4'] = null;
         } else {
-            // TODO checks for annotation is part of selected image!!
+            var nbrs = []
+            var objcts = []
+
             var c = $('#capt1').val();
             var n = $('#nr1').val();
             if (!c || !n) {
                 alert('Object 1 is not filled in completely.');
                 return false;
             }
-            if (!results[idx]['sentence'].includes(c)) {
+            if (!results[idx]['sentence'].toLowerCase().includes(c.toLowerCase())) {
                 alert('The sentence part of object 1 does not occur in the selected sentence.');
                 return false;
             }
-            if (isNaN(n)) {
-                alert('The object nr of object 1 is not a correct number.');
-                return false;
+            for (num of n.split(',')){
+                if (isNaN(num)) {
+                    alert('The object nr(s) of object 1 can only be numbers seperated by ",".');
+                    return false;
+                }
+                nbrs.push(num)
             }
+            objcts.push(c)
             results[idx]['Objectname1'] = c;
             results[idx]['Objectnr1'] = n;
 
@@ -407,14 +482,18 @@
                 alert('Object 2 is not filled in completely.');
                 return false;
             }
-            if (!results[idx]['sentence'].includes(c)) {
+            if (!results[idx]['sentence'].toLowerCase().includes(c.toLowerCase())) {
                 alert('The sentence part of object 2 does not occur in the selected sentence.');
                 return false;
             }
-            if (isNaN(n) || n == results[idx]['Objectnr1']) {
-                alert('The object nr of object 2 is not a correct number.');
-                return false;
+            for (num of n.split(',')){
+                if (isNaN(num)) {
+                    alert('The object nr(s) of object 2 can only be numbers seperated by ",".');
+                    return false;
+                }
+                nbrs.push(num)
             }
+            objcts.push(c)
             results[idx]['Objectname2'] = c;
             results[idx]['Objectnr2'] = n;
 
@@ -428,13 +507,21 @@
                 alert('Object 3 is missing an sentence part.');
                 return false;
             }
-            if (c && !results[idx]['sentence'].includes(c)) {
+            if (c && !results[idx]['sentence'].toLowerCase().includes(c.toLowerCase())) {
                 alert('The sentence part of object 3 does not occur in the selected sentence.');
                 return false;
             }
-            if (n && (isNaN(n) || n == results[idx]['Objectnr1'] || n == results[idx]['Objectnr2'])) {
-                alert('The object nr of object 3 is not a correct number.');
-                return false;
+            if (n) {
+                for (num of n.split(',')){
+                    if (isNaN(num)) {
+                        alert('The object nr(s) of object 3 can only be numbers seperated by ",".');
+                        return false;
+                    }
+                    nbrs.push(num)
+                }
+            }
+            if (c) {
+                objcts.push(c)
             }
             results[idx]['Objectname3'] = c;
             results[idx]['Objectnr3'] = n;
@@ -449,16 +536,41 @@
                 alert('Object 4 is missing an sentence part.');
                 return false;
             }
-            if (c && !results[idx]['sentence'].includes(c)) {
+            if (c && !results[idx]['sentence'].toLowerCase().includes(c.toLowerCase())) {
                 alert('The sentence part of object 4 does not occur in the selected sentence.');
                 return false;
             }
-            if (n && (isNaN(n) || n == results[idx]['Objectnr1'] || n == results[idx]['Objectnr2'] || n == results[idx]['Objectnr3'])) {
-                alert('The object nr of object 4 is not a correct number.');
-                return false;
+            if (n) {
+                for (num of n.split(',')){
+                    if (isNaN(num)) {
+                        alert('The object nr(s) of object 1 can only be numbers seperated by ",".');
+                        return false;
+                    }
+                    nbrs.push(num)
+                }
+            }
+            if (c) {
+                objcts.push(c)
             }
             results[idx]['Objectname4'] = c;
             results[idx]['Objectnr4'] = n;
+
+            var u_nbrs = new Set(nbrs)
+            if (nbrs.length !== u_nbrs.size) {
+                alert('All object numbers can be used only once!');
+                return false;
+            }
+            console.log(objcts)
+            for (var i in objcts) {
+                var start1 = results[idx]['sentence'].indexOf(objcts[i])
+                for (let j = 0; j < i; j++) {
+                    var start2 = results[idx]['sentence'].indexOf(objcts[j])
+                    if (Math.max(start1,start2) < Math.min(start1 + objcts[i].length, start2  + objcts[j].length)){
+                        alert('All sentence parts can be used only once!');
+                        return false
+                    }
+                }
+            }
         }
         return true;
     }
@@ -487,8 +599,8 @@
                 return false;
             }
             for (var i = 0; i < input.length; i++) {
-                if (results[i] == null || results[i].length == 0) {
-                    alert('You did not write a caption for #' + (i + 1));
+                if (results[i]['sentence'] == null) {
+                    alert('You did fill in number #' + (i + 1));
                     return false;
                 }
             }
@@ -496,7 +608,7 @@
             // Copy the url and captions to the output we will return to the requester.
             var output = input;
             for (var i = 0; i < output.length; i++) {
-                output[i]['caption'] = results[i];
+                output[i]['results'] = results[i];
             }
             if (easyturk.isPreview()) {
                 alert("This is only a preview. Here is your output: \n" + JSON.stringify(output));
